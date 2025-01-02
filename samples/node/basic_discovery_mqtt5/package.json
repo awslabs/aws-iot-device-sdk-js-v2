@@ -1,0 +1,27 @@
+{
+  "name": "basic-discovery-mqtt5",
+  "version": "1.0.0",
+  "description": "NodeJS IoT SDK v2 Greengrass MQTT5 Discovery Sample",
+  "homepage": "https://github.com/awslabs/aws-iot-device-sdk-js-v2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aws/aws-iot-device-sdk-js-v2.git"
+  },
+  "contributors": [
+    "AWS SDK Common Runtime Team <aws-sdk-common-runtime@amazon.com>"
+  ],
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "scripts": {
+    "tsc": "tsc",
+    "prepare": "npm run tsc"
+  },
+  "devDependencies": {
+    "@types/yargs": "^17.0.24",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "aws-iot-device-sdk-v2": "file:../../..",
+    "yargs": "^16.2.0"
+  }
+}
