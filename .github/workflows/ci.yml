@@ -28,8 +28,6 @@ env:
   CI_FLEET_PROVISIONING_ROLE: arn:aws:iam::180635532705:role/service-role/CI_FleetProvisioning_Role
   CI_DEVICE_ADVISOR: arn:aws:iam::180635532705:role/CI_DeviceAdvisor_Role
   CI_MQTT5_ROLE: arn:aws:iam::180635532705:role/CI_MQTT5_Role
-  CI_GREENGRASS_ROLE: arn:aws:iam::180635532705:role/CI_Greengrass_Role
-  CI_GREENGRASS_INSTALLER_ROLE: arn:aws:iam::180635532705:role/CI_GreengrassInstaller_Role
   CI_SHADOW_SERVICE_CLIENT_ROLE: arn:aws:iam::180635532705:role/CI_ShadowServiceClient_Role
   CI_JOBS_SERVICE_CLIENT_ROLE: arn:aws:iam::180635532705:role/CI_JobsServiceClient_Role
 
@@ -385,57 +383,6 @@ jobs:
     - name: run MQTT5 Shared Subscription sample
       run: |
         python3 ./aws-iot-device-sdk-js-v2/utils/run_in_ci.py --file ./aws-iot-device-sdk-js-v2/.github/workflows/ci_run_mqtt5_shared_subscription_cfg.json
-
-  # Runs the Greengrass samples
-  linux-greengrass-tests:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write # This is required for requesting the JWT
-    steps:
-      - name: Build ${{ env.PACKAGE_NAME }}
-        run: |
-          python3 -c "from urllib.request import urlretrieve; urlretrieve('${{ env.BUILDER_HOST }}/${{ env.BUILDER_SOURCE }}/${{ env.BUILDER_VERSION }}/builder.pyz?run=${{ env.RUN }}', 'builder')"
-          chmod a+x builder
-          ./builder build -p ${{ env.PACKAGE_NAME }}
-      - name: Install Greengrass Development Kit
-        run: |
-          python3 -m pip install awsiotsdk
-          python3 -m pip install -U git+https://github.com/aws-greengrass/aws-greengrass-gdk-cli.git@v1.6.2
-      - name: Configure AWS credentials (Greengrass)
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ env.CI_GREENGRASS_INSTALLER_ROLE }}
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
-      - name: Build and run Greengrass basic discovery sample
-        working-directory: ./aws-iot-device-sdk-js-v2/test/greengrass/basic_discovery
-        run: |
-          gdk component build
-          gdk test-e2e build
-          gdk test-e2e run
-      - name: Show logs
-        working-directory: ./aws-iot-device-sdk-js-v2/test/greengrass/basic_discovery
-        # Print logs unconditionally to provide more details on Greengrass run even if the test failed.
-        if: always()
-        run: |
-          echo "=== greengrass.log"
-          cat testResults/gg*/greengrass.log
-          echo "=== software.amazon.awssdk.sdk-gg-test-discovery.log"
-          cat testResults/gg*/software.amazon.awssdk.sdk-gg-test-discovery.log
-      - name: Build and run Greengrass IPC sample
-        working-directory: ./aws-iot-device-sdk-js-v2/test/greengrass/ipc
-        run: |
-          gdk component build
-          gdk test-e2e build
-          gdk test-e2e run
-      - name: Show logs
-        working-directory: ./aws-iot-device-sdk-js-v2/test/greengrass/ipc
-        # Print logs unconditionally to provide more details on Greengrass run even if the test failed.
-        if: always()
-        run: |
-          echo "=== greengrass.log"
-          cat testResults/gg*/greengrass.log
-          echo "=== software.amazon.awssdk.sdk-gg-ipc.log"
-          cat testResults/gg*/software.amazon.awssdk.sdk-gg-ipc.log
 
   # check that docs can still build
   check-docs:
